@@ -169,7 +169,7 @@ class TimeSkill(MycroftSkill):
         if not dt:
             return
 
-        return nice_time(dt, self.lang, speech=False,
+        return nice_time(dt, "de-de", speech=False,
                          use_24hour=self.use_24hour)
 
     def get_spoken_time(self, location=None):
@@ -178,7 +178,7 @@ class TimeSkill(MycroftSkill):
         if not dt:
             return
 
-        return nice_time(dt, self.lang, speech=True,
+        return nice_time(dt, "de-de", speech=True,
                          use_24hour=self.use_24hour)
 
     def display(self, display_time):
