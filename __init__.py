@@ -22,13 +22,13 @@ from adapt.intent import IntentBuilder
 import mycroft.audio
 from mycroft.skills.core import MycroftSkill, intent_handler
 import mycroft.client.enclosure.display_manager as DisplayManager
-# from mycroft.util.format import nice_time
+from mycroft.util.format import nice_time
 from mycroft.util.format import pronounce_number
 
 
 # TODO: This is temporary until nice_time() gets fixed in mycroft-core's
 # next release
-def nice_time(dt, lang, speech=True, use_24hour=False, use_ampm=False):
+def __disabled__nice_time(dt, lang, speech=True, use_24hour=False, use_ampm=False):
     """
     Format a time to a comfortable human format
 
@@ -198,7 +198,7 @@ class TimeSkill(MycroftSkill):
             '9': 'EIMBEBMHAA',
         }
 
-        
+
         # clear screen (draw two blank sections, numbers cover rest)
         if len(display_time) == 4:
             # for 4-character times, 9x8 blank
