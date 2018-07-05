@@ -23,93 +23,94 @@ import mycroft.audio
 from mycroft.skills.core import MycroftSkill, intent_handler
 import mycroft.client.enclosure.display_manager as DisplayManager
 from mycroft.util.format import nice_time
+from mycroft.util.format import nice_date
 from mycroft.util.format import pronounce_number
 
 
 # TODO: This is temporary until nice_time() gets fixed in mycroft-core's
 # next release
-def __disabled__nice_time(dt, lang, speech=True, use_24hour=False, use_ampm=False):
-    """
-    Format a time to a comfortable human format
-
-    For example, generate 'five thirty' for speech or '5:30' for
-    text display.
-
-    Args:
-        lang (string): ignored
-        dt (datetime): date to format (assumes already in local timezone)
-        speech (bool): format for speech (default/True) or display (False)=Fal
-        use_24hour (bool): output in 24-hour/military or 12-hour format
-        use_ampm (bool): include the am/pm for 12-hour format
-    Returns:
-        (str): The formatted time string
-    """
-    if use_24hour:
-        # e.g. "03:01" or "14:22"
-        string = dt.strftime("%H:%M")
-    else:
-        if use_ampm:
-            # e.g. "3:01 AM" or "2:22 PM"
-            string = dt.strftime("%I:%M %p")
-        else:
-            # e.g. "3:01" or "2:22"
-            string = dt.strftime("%I:%M")
-        if string[0] == '0':
-            string = string[1:]  # strip leading zeros
-
-    if not speech:
-        return string
-
-    # Generate a speakable version of the time
-    if use_24hour:
-        speak = ""
-
-        # Either "0 8 hundred" or "13 hundred"
-        if string[0] == '0':
-            speak += pronounce_number(int(string[0])) + " "
-            speak += pronounce_number(int(string[1]))
-        else:
-            speak = pronounce_number(int(string[0:2]))
-
-        speak += " "
-        if string[3:5] == '00':
-            speak += "hundred"
-        else:
-            if string[3] == '0':
-                speak += pronounce_number(0) + " "
-                speak += pronounce_number(int(string[4]))
-            else:
-                speak += pronounce_number(int(string[3:5]))
-        return speak
-    else:
-        if dt.hour == 0 and dt.minute == 0:
-            return "midnight"
-        if dt.hour == 12 and dt.minute == 0:
-            return "noon"
-        # TODO: "half past 3", "a quarter of 4" and other idiomatic times
-
-        if dt.hour == 0:
-            speak = pronounce_number(12)
-        elif dt.hour < 13:
-            speak = pronounce_number(dt.hour)
-        else:
-            speak = pronounce_number(dt.hour-12)
-
-        if dt.minute == 0:
-            if not use_ampm:
-                return speak + " o'clock"
-        else:
-            if dt.minute < 10:
-                speak += " oh"
-            speak += " " + pronounce_number(dt.minute)
-
-        if use_ampm:
-            if dt.hour > 11:
-                speak += " PM"
-            else:
-                speak += " AM"
-
-        return speak
+# def nice_time(dt, lang, speech=True, use_24hour=False, use_ampm=False):
+#     """
+#     Format a time to a comfortable human format
+#
+#     For example, generate 'five thirty' for speech or '5:30' for
+#     text display.
+#
+#     Args:
+#         lang (string): ignored
+#         dt (datetime): date to format (assumes already in local timezone)
+#         speech (bool): format for speech (default/True) or display (False)=Fal
+#         use_24hour (bool): output in 24-hour/military or 12-hour format
+#         use_ampm (bool): include the am/pm for 12-hour format
+#     Returns:
+#         (str): The formatted time string
+#     """
+#     if use_24hour:
+#         # e.g. "03:01" or "14:22"
+#         string = dt.strftime("%H:%M")
+#     else:
+#         if use_ampm:
+#             # e.g. "3:01 AM" or "2:22 PM"
+#             string = dt.strftime("%I:%M %p")
+#         else:
+#             # e.g. "3:01" or "2:22"
+#             string = dt.strftime("%I:%M")
+#         if string[0] == '0':
+#             string = string[1:]  # strip leading zeros
+#
+#     if not speech:
+#         return string
+#
+#     # Generate a speakable version of the time
+#     if use_24hour:
+#         speak = ""
+#
+#         # Either "0 8 hundred" or "13 hundred"
+#         if string[0] == '0':
+#             speak += pronounce_number(int(string[0])) + " "
+#             speak += pronounce_number(int(string[1]))
+#         else:
+#             speak = pronounce_number(int(string[0:2]))
+#
+#         speak += " "
+#         if string[3:5] == '00':
+#             speak += "hundred"
+#         else:
+#             if string[3] == '0':
+#                 speak += pronounce_number(0) + " "
+#                 speak += pronounce_number(int(string[4]))
+#             else:
+#                 speak += pronounce_number(int(string[3:5]))
+#         return speak
+#     else:
+#         if dt.hour == 0 and dt.minute == 0:
+#             return "midnight"
+#         if dt.hour == 12 and dt.minute == 0:
+#             return "noon"
+#         # TODO: "half past 3", "a quarter of 4" and other idiomatic times
+#
+#         if dt.hour == 0:
+#             speak = pronounce_number(12)
+#         elif dt.hour < 13:
+#             speak = pronounce_number(dt.hour)
+#         else:
+#             speak = pronounce_number(dt.hour-12)
+#
+#         if dt.minute == 0:
+#             if not use_ampm:
+#                 return speak + " o'clock"
+#         else:
+#             if dt.minute < 10:
+#                 speak += " oh"
+#             speak += " " + pronounce_number(dt.minute)
+#
+#         if use_ampm:
+#             if dt.hour > 11:
+#                 speak += " PM"
+#             else:
+#                 speak += " AM"
+#
+#         return speak
 
 
 class TimeSkill(MycroftSkill):
@@ -301,11 +302,12 @@ class TimeSkill(MycroftSkill):
             return
 
         # Get the current date
-        speak = local_date.strftime("%A, %B %-d, %Y")
+        #speak = local_date.strftime("%A, %B %-d, %Y")
+        speak = nice_date(local_date, "de-de")
         if self.config_core.get('date_format') == 'MDY':
             show = local_date.strftime("%-m/%-d/%Y")
         else:
-            show = local_date.strftime("%Y/%-d/%-m")
+            show = local_date.strftime("%-d/%-m/%Y")
 
         # speak it
         self.speak_dialog("date", {"date": speak})
