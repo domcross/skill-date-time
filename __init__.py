@@ -17,7 +17,7 @@ import tzlocal
 from astral import Astral
 from pytz import timezone
 import time
-import mycroft.util.LOG
+
 
 from adapt.intent import IntentBuilder
 import mycroft.audio
@@ -26,6 +26,7 @@ import mycroft.client.enclosure.display_manager as DisplayManager
 from mycroft.util.format import nice_time
 from mycroft.util.format import nice_date
 from mycroft.util.format import pronounce_number
+from mycroft.util.log import LOG
 
 # TODO: This is temporary until nice_time() gets fixed in mycroft-core's
 # next release
@@ -112,6 +113,25 @@ from mycroft.util.format import pronounce_number
 #
 #         return speak
 
+def nice_date_de(local_date):
+
+    # dates are returned as, for example:
+    # "Samstag, der siebte Juli zweitausendachtzehn"
+    # this returns the years as regular numbers,
+    # not 19 hundred ..., but one thousand nine hundred
+    # which is fine from the year 2000
+
+    de_months = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+                 'Juli', 'August', 'September', 'October', 'November',
+                 'Dezember']
+
+    de_weekdays = ['Montag', 'Dienstag', 'Mittwoch',
+                   'Donnerstag', 'Freitag', 'Samstag', 'Sonntag']
+
+    return de_weekdays[local_date.weekday()] + ", der " \
+            + pronounce_ordinal_de(local_date.day) + " " \
+            + de_months[local_date.month - 1] \
+            + " " + pronounce_number(local_date.year, lang = "de")
 
 class TimeSkill(MycroftSkill):
 
@@ -170,7 +190,7 @@ class TimeSkill(MycroftSkill):
         if not dt:
             return
 
-        return nice_time(dt, "de-de", speech=False,
+        return nice_time(dt, self.lang, speech=False,
                          use_24hour=self.use_24hour)
 
     def get_spoken_time(self, location=None):
@@ -179,7 +199,7 @@ class TimeSkill(MycroftSkill):
         if not dt:
             return
 
-        return nice_time(dt, "de-de", speech=True,
+        return nice_time(dt, self.lang, speech=True,
                          use_24hour=self.use_24hour)
 
     def display(self, display_time):
@@ -302,16 +322,23 @@ class TimeSkill(MycroftSkill):
             return
 
         # Get the current date
-        #speak = local_date.strftime("%A, %B %-d, %Y")
+        # If language is German, use nice_date_de
+        # otherwise use locale
         LOG.debug("local_date: %s", local_date.strftime("%A, %B %-d, %Y"))
-        speak = nice_date(local_date, "de-de")
-        LOG.debug("speak: %s", speak)
+
+        lang_lower = str(self.lang).lower()
+        if lang_lower.startswith("de"):
+            speak = nice_date_de(local_date)
+        else:
+            speak = local_date.strftime("%A, %B %-d, %Y")
+
         if self.config_core.get('date_format') == 'MDY':
             show = local_date.strftime("%-m/%-d/%Y")
         else:
             show = local_date.strftime("%-d/%-m/%Y")
 
         # speak it
+        LOG.debug("speak: %s", speak)
         self.speak_dialog("date", {"date": speak})
 
         # and briefly show the time
