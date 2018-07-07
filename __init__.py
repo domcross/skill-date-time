@@ -17,6 +17,7 @@ import tzlocal
 from astral import Astral
 from pytz import timezone
 import time
+import mycroft.util.LOG
 
 from adapt.intent import IntentBuilder
 import mycroft.audio
@@ -25,7 +26,6 @@ import mycroft.client.enclosure.display_manager as DisplayManager
 from mycroft.util.format import nice_time
 from mycroft.util.format import nice_date
 from mycroft.util.format import pronounce_number
-
 
 # TODO: This is temporary until nice_time() gets fixed in mycroft-core's
 # next release
@@ -303,7 +303,9 @@ class TimeSkill(MycroftSkill):
 
         # Get the current date
         #speak = local_date.strftime("%A, %B %-d, %Y")
+        LOG.debug("local_date: %s", local_date.strftime("%A, %B %-d, %Y"))
         speak = nice_date(local_date, "de-de")
+        LOG.debug("speak: %s", speak)
         if self.config_core.get('date_format') == 'MDY':
             show = local_date.strftime("%-m/%-d/%Y")
         else:
