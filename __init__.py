@@ -26,6 +26,7 @@ import mycroft.client.enclosure.display_manager as DisplayManager
 from mycroft.util.format import nice_time
 from mycroft.util.format import nice_date
 from mycroft.util.format import pronounce_number
+from mycroft.util.lang.format_de import nice_time_de, pronounce_ordinal_de
 from mycroft.util.log import LOG
 
 # TODO: This is temporary until nice_time() gets fixed in mycroft-core's
